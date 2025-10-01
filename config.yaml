@@ -1,14 +1,11 @@
 site:
-  base_url: "https://cdasiaonline.com"   # adjust to exact portal
+  base_url: "https://classic.cdasiaonline.com"   # adjust to exact portal
   login_path: "/signin"
-  search_path: "/"
+  search_path: "/search"
   downloads_subdir: "data/downloads"
   log_dir: "data/logs"
 
 filters:
-  library: "Securities and Exchange"
-  sections:
-    - "Opinions"
   division: "SEC-OGC"
   keywords: ["SEC-OGC Opinion", "Office of the General Counsel"]
   year_from: 2010

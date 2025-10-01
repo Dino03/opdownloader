@@ -1,4 +1,4 @@
-# Selector map aligned with the Material-UI based CDAsia portal.
+# Placeholder selectors – update to match CDAsia's live DOM.
 SEL = {
     # Login
     "login_user": "input[name='id']",
@@ -6,25 +6,22 @@ SEL = {
     "login_submit": "button[type='submit']",
     "post_login_marker": "nav .user-avatar",  # an element present only after login
 
-    # Search form controls
-    "search_library_button": "#library-menu-button",
-    "search_library_menu": "#search-library-menu",
-    "search_library_option": "label.MuiMenuItem-root:has-text('{library}')",
-    "search_backdrop": "div.MuiBackdrop-root",
-    "search_section_chip": "button.MuiButtonBase-root:has-text('{section}')",
-    "search_division_chip": "button.MuiButtonBase-root:has-text('{division}')",
-    "search_submit": "#submit_btn",
+    # Search form
+    "search_division": "input[name='division']",
+    "search_keywords": "input[name='q']",
+    "search_year_from": "input[name='year_from']",
+    "search_year_to": "input[name='year_to']",
+    "search_submit": "button:has-text('Search')",
 
-    # Results table
-    "results_container": "table.MuiTable-root tbody",
-    "result_row": "table.MuiTable-root tbody tr",
-    "result_ref": "td:nth-of-type(1)",
-    "result_title": "td:nth-of-type(2)",
-    "result_date": "td:nth-of-type(3)",
+    # Results
+    "results_container": "#results",
+    "result_card": ".result-card",
+    "card_title": ".result-title",
+    "card_link": ".result-title a",
+    "card_date": ".result-date",
 
     # Pagination
-    "pagination_next": "button[aria-label='Go to next page']",
-
-    # Download link on detail page (toolbar icon button)
-    "download_link": "button[aria-label='Download']"
+    "pagination_next": "button[aria-label='Next']",
+    # Download link on detail page
+    "download_link": "a:has-text('Download')"
 }

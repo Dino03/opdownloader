@@ -1,5 +1,7 @@
-import yaml
 from pathlib import Path
+from typing import Any, Dict
+
+import yaml
 
 _DEFAULT_CFG = {
     "site": {
@@ -29,6 +31,15 @@ _DEFAULT_CFG = {
     }
 }
 
+def _deep_merge(target: Dict[str, Any], defaults: Dict[str, Any]) -> Dict[str, Any]:
+    for key, value in defaults.items():
+        if isinstance(value, dict):
+            target[key] = _deep_merge(target.get(key, {}), value)
+        else:
+            target.setdefault(key, value)
+    return target
+
+
 def load_config() -> dict:
     path = Path("config.yaml")
     if path.exists():
@@ -36,15 +47,12 @@ def load_config() -> dict:
     else:
         cfg = {}
 
-    def deep_merge(a, b):
-        for k, v in b.items():
-            if isinstance(v, dict):
-                a[k] = deep_merge(a.get(k, {}), v)
-            else:
-                a[k] = a.get(k, v)
-        return a
+    return _deep_merge(cfg, _DEFAULT_CFG.copy())
 
-    return deep_merge(cfg, _DEFAULT_CFG.copy())
+
+def save_config(cfg: Dict[str, Any], path: Path | str = "config.yaml") -> None:
+    path = Path(path)
+    path.write_text(yaml.safe_dump(cfg, sort_keys=False))
 
 def ensure_dirs(paths):
     for p in paths:

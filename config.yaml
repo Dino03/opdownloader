@@ -1,0 +1,24 @@
+site:
+  base_url: "https://www.cdasia.com"   # adjust to exact portal
+  login_path: "/login"
+  search_path: "/search"
+  downloads_subdir: "data/downloads"
+  log_dir: "data/logs"
+
+filters:
+  division: "SEC-OGC"
+  keywords: ["SEC-OGC Opinion", "Office of the General Counsel"]
+  year_from: 2010
+  year_to: 2025
+  max_docs: 0   # 0 = unlimited
+
+scrape:
+  headless: true
+  timeout_ms: 45000
+  navigation_timeout_ms: 60000
+  throttle_ms: 1500
+  batch_size: 5
+  download_timeout_ms: 120000
+  retries: 3
+  resume: true
+  user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118 Safari/537.36"

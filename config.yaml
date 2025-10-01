@@ -1,6 +1,6 @@
 site:
-  base_url: "https://www.cdasia.com"   # adjust to exact portal
-  login_path: "/login"
+  base_url: "https://classic.cdasiaonline.com"   # adjust to exact portal
+  login_path: "/signin"
   search_path: "/search"
   downloads_subdir: "data/downloads"
   log_dir: "data/logs"

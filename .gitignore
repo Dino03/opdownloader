@@ -1,0 +1,21 @@
+# Virtual environments
+.venv/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local data and caches
+data/
+vendor/
+.playwright/
+.DS_Store
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+

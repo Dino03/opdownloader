@@ -34,6 +34,17 @@ cp .env.example .env
 ./scripts/run.sh --year-from 2015 --year-to 2025 --division "SEC-OGC"
 ```
 
+## Optional: run the web app
+
+If you prefer a browser-based UI to tweak filters and launch runs, install the new web dependencies and start Uvicorn:
+
+```bash
+pip install -r requirements.txt
+uvicorn src.webapp:app --reload --port 8000
+```
+
+Then open <http://localhost:8000>. The page mirrors the CLI filters, lets you choose headless vs. headed mode, supports dry-run previews, and streams task progress (including log file paths for each run).
+
 ## Notes
 - Update CSS selectors in `src/selectors.py` to match CDAsia's DOM (placeholders provided).
 - If your org uses SSO/2FA, run headed first (`--dry-run`) and complete steps in the visible browser.

@@ -6,3 +6,5 @@ pandas>=2.2
 tqdm>=4.66
 loguru>=0.7
 tenacity>=8.4
+fastapi>=0.111
+uvicorn[standard]>=0.29

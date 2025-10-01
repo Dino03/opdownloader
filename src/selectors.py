@@ -1,7 +1,7 @@
 # Placeholder selectors – update to match CDAsia's live DOM.
 SEL = {
     # Login
-    "login_user": "input[name='username']",
+    "login_user": "input[name='id']",
     "login_pass": "input[name='password']",
     "login_submit": "button[type='submit']",
     "post_login_marker": "nav .user-avatar",  # an element present only after login

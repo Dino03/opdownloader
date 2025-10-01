@@ -68,17 +68,26 @@ On Windows Command Prompt the command is:
 
 If you see `(.venv)` at the beginning of your terminal prompt, activation worked. When you are finished working, type `deactivate` to exit the environment.
 
-### 4. Install Python packages and Playwright browser
+### 4. Bootstrap the environment (one-time download of requirements)
 
-With the virtual environment active, run:
+The project ships with a helper script that downloads every Python package listed in
+`requirements.txt` into `vendor/wheels`, installs them into the virtual environment,
+and grabs the Playwright Chromium browser. After the first run, the cached wheels are
+reused so you do not have to re-download packages every time.
 
 ```bash
-pip install -r requirements.txt
-playwright install chromium
+./scripts/bootstrap.sh
 ```
 
-- If you see `command not found: pip`, use `pip3`.
-- The Playwright install command downloads the Chromium browser that powers the automation. Allow it to finish completely.
+If you see `command not found`, make the scripts executable once:
+
+```bash
+chmod +x scripts/*.sh
+```
+
+> The bootstrap script upgrades `pip`, refreshes the local wheel cache only when the
+> `requirements.txt` file changes, and then installs everything using `pip install --no-index`
+> so it never needs to reach the internet again unless you update the requirements.
 
 ### 5. Copy the environment template and fill in credentials
 
@@ -121,10 +130,9 @@ Once you are comfortable with the basics, you can skip to the [Quick Start](#qui
 git clone https://github.com/YOUR_GH_USERNAME/cdasia-opinion-downloader.git
 cd cdasia-opinion-downloader
 
-# 2) Python env + deps
+# 2) Python env + deps (downloaded once into vendor/wheels)
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-playwright install chromium
+./scripts/bootstrap.sh
 
 # 3) Configure
 cp .env.example .env
@@ -140,10 +148,11 @@ cp .env.example .env
 
 ## Optional: run the web app
 
-If you prefer a browser-based UI to tweak filters and launch runs, install the new web dependencies and start Uvicorn:
+If you prefer a browser-based UI to tweak filters and launch runs, ensure dependencies are bootstrapped and start Uvicorn:
 
 ```bash
-pip install -r requirements.txt
+source .venv/bin/activate
+./scripts/bootstrap.sh
 uvicorn src.webapp:app --reload --port 8000
 ```
 

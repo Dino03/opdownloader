@@ -1,7 +1,7 @@
 import asyncio
 import os
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Optional
 from dotenv import load_dotenv
 from loguru import logger
 from tenacity import retry, stop_after_attempt, wait_fixed
@@ -34,12 +34,30 @@ class CDAsiaClient:
         logger.debug(f"Navigating to {url}")
         await self.page.goto(url, timeout=self.cfg["scrape"]["navigation_timeout_ms"])
 
-    async def login(self, human_checkpoint: bool = True):
+    async def login(
+        self,
+        human_checkpoint: bool = True,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+    ):
         load_dotenv()
-        user = os.getenv("CDASIA_USERNAME")
-        pwd = os.getenv("CDASIA_PASSWORD")
+
+        auth_cfg = self.cfg.get("auth", {}) if isinstance(self.cfg, dict) else {}
+        user = (
+            username
+            or auth_cfg.get("username")
+            or os.getenv("CDASIA_USERNAME")
+        )
+        pwd = (
+            password
+            or auth_cfg.get("password")
+            or os.getenv("CDASIA_PASSWORD")
+        )
         if not user or not pwd:
-            raise RuntimeError("Missing CDASIA_USERNAME or CDASIA_PASSWORD in .env")
+            raise RuntimeError(
+                "Missing CDAsia credentials. Provide them via .env (CDASIA_USERNAME/"
+                "CDASIA_PASSWORD), config auth.username/auth.password, or CLI overrides."
+            )
 
         await self.goto(self.cfg["site"]["base_url"] + self.cfg["site"]["login_path"])
         await self.page.fill(SEL["login_user"], user)

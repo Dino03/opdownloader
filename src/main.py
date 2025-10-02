@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import getpass
 from pathlib import Path
 from loguru import logger
 from .cdasia import CDAsiaClient
@@ -15,6 +16,13 @@ def parse_args():
     p.add_argument("--max-docs", type=int, default=None)
     p.add_argument("--headless", action="store_true")
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--username", type=str, default=None, help="CDAsia username (overrides .env)")
+    p.add_argument("--password", type=str, default=None, help="CDAsia password (overrides .env; use with caution)")
+    p.add_argument(
+        "--prompt-password",
+        action="store_true",
+        help="Prompt for the CDAsia password interactively instead of reading from .env",
+    )
     return p.parse_args()
 
 async def run():
@@ -35,8 +43,19 @@ async def run():
 
     logger.add(logs_dir / "run.log", rotation="2 MB")
 
+    auth_cfg = cfg.get("auth", {}) if isinstance(cfg, dict) else {}
+    username = args.username or auth_cfg.get("username")
+    password = args.password or auth_cfg.get("password")
+
+    if args.prompt_password:
+        password = getpass.getpass("CDAsia password: ")
+
     async with CDAsiaClient(cfg) as client:
-        await client.login(human_checkpoint=True)
+        await client.login(
+            human_checkpoint=True,
+            username=username,
+            password=password,
+        )
         results = await client.search()
         if args.dry_run:
             for r in results:

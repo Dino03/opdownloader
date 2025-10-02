@@ -95,7 +95,7 @@ chmod +x scripts/*.sh
 cp .env.example .env
 ```
 
-Open `.env` in any text editor (VS Code, Notepad, nano, etc.) and add your CDAsia username and password. Do the same for `config.yaml`, setting the year range, division, and keywords you want to download.
+Open `.env` in any text editor (VS Code, Notepad, nano, etc.) and add your CDAsia username and password. Do the same for `config.yaml`, setting the year range, division, and keywords you want to download. If you prefer not to keep credentials in `.env`, you can instead fill in the optional `auth.username` / `auth.password` fields in `config.yaml`, or launch the tool with `--username` and either `--password` or `--prompt-password` to type it interactively.
 
 ### 6. Run the downloader
 

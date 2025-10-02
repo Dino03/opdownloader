@@ -3,6 +3,8 @@ import asyncio
 import getpass
 from pathlib import Path
 from loguru import logger
+from playwright.async_api import TimeoutError as PlaywrightTimeout
+
 from .cdasia import CDAsiaClient
 from .downloader import Downloader
 from .utils import load_config, ensure_dirs
@@ -51,11 +53,23 @@ async def run():
         password = getpass.getpass("CDAsia password: ")
 
     async with CDAsiaClient(cfg) as client:
-        await client.login(
-            human_checkpoint=True,
-            username=username,
-            password=password,
-        )
+        try:
+            await client.login(
+                human_checkpoint=True,
+                username=username,
+                password=password,
+            )
+        except PlaywrightTimeout:
+            logger.error(
+                "Login validation timed out. Ensure any CAPTCHA or 2FA prompts are completed, then retry."
+            )
+            logger.info("Aborting run because login could not be confirmed.")
+            return
+        except RuntimeError as exc:
+            logger.error(str(exc))
+            logger.info("Aborting run because login failed.")
+            return
+
         results = await client.search()
         if args.dry_run:
             for r in results:

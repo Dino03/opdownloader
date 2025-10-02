@@ -2,10 +2,13 @@ import asyncio
 import os
 from datetime import datetime
 from typing import List, Dict, Optional
+from urllib.parse import unquote_plus
+
 from dotenv import load_dotenv
 from loguru import logger
 from tenacity import retry, stop_after_attempt, wait_fixed
 from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeout
+
 from .selectors import SEL
 
 class CDAsiaClient:
@@ -65,16 +68,25 @@ class CDAsiaClient:
         await self.page.fill(SEL["login_pass"], pwd)
         await asyncio.sleep(0.5)
         await self.page.click(SEL["login_submit"])
-        await asyncio.sleep(self.cfg["scrape"]["throttle_ms"]/1000)
+        await asyncio.sleep(self.cfg["scrape"]["throttle_ms"] / 1000)
+
+        cookies = await self.context.cookies()
+        session_error = next(
+            (cookie for cookie in cookies if cookie.get("name") == "cdasia_session_error"),
+            None,
+        )
+        if session_error and session_error.get("value"):
+            decoded_error = unquote_plus(session_error.get("value", "").strip())
+            if decoded_error:
+                logger.error(f"CDAsia login failed: {decoded_error}")
+                raise RuntimeError(f"CDAsia login failed: {decoded_error}")
 
         if human_checkpoint:
-            logger.info("If a CAPTCHA or 2FA appears, complete it in the browser window. Waiting up to 60s…")
-            try:
-                await self.page.wait_for_selector(SEL["post_login_marker"], timeout=60000)
-            except PlaywrightTimeout:
-                logger.warning("Post-login marker not found yet. Increase timeout if needed.")
-        else:
-            await self.page.wait_for_selector(SEL["post_login_marker"], timeout=60000)
+            logger.info(
+                "If a CAPTCHA or 2FA appears, complete it in the browser window. Waiting up to 60s…"
+            )
+
+        await self.page.wait_for_selector(SEL["post_login_marker"], timeout=60000)
 
     async def search(self) -> List[Dict]:
         url = self.cfg["site"]["base_url"] + self.cfg["site"]["search_path"]

@@ -18,13 +18,13 @@ source "$VENV_PATH/bin/activate"
 
 mkdir -p "$WHEEL_DIR"
 
-current_hash=$(python - <<'PY'
+current_hash=$(python - "$REQUIREMENTS_FILE" <<'PY'
 import hashlib, sys
 from pathlib import Path
 req = Path(sys.argv[1])
 print(hashlib.sha256(req.read_bytes()).hexdigest())
 PY
-"$REQUIREMENTS_FILE")
+)
 
 stored_hash=""
 if [ -f "$REQ_HASH_FILE" ]; then

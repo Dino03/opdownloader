@@ -5,6 +5,11 @@ site:
   downloads_subdir: "data/downloads"
   log_dir: "data/logs"
 
+auth:
+  # Optional: leave blank to rely on environment variables or CLI overrides
+  username:
+  password:
+
 filters:
   library: "Securities and Exchange"
   sections:

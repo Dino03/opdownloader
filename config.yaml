@@ -18,6 +18,11 @@ filters:
   keywords: ["SEC-OGC Opinion", "Office of the General Counsel"]
   year_from: 2010
   year_to: 2025
+  title:
+  number:
+  ponente:
+  citation:
+  court:
   max_docs: 0   # 0 = unlimited
 
 scrape:

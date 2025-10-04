@@ -9,6 +9,8 @@ from loguru import logger
 from tenacity import retry, stop_after_attempt, wait_fixed
 from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeout
 
+import re
+
 from .selectors import SEL
 
 class CDAsiaClient:
@@ -94,13 +96,27 @@ class CDAsiaClient:
 
         throttle = self.cfg["scrape"]["throttle_ms"] / 1000
 
-        library = self.cfg["filters"].get("library")
+        filters = self.cfg["filters"]
+
+        library = filters.get("library")
         if library:
             await self.page.wait_for_selector(SEL["search_library_button"], timeout=60000)
             await self.page.click(SEL["search_library_button"])
-            await self.page.wait_for_selector(SEL["search_library_menu"], timeout=15000)
-            option_selector = SEL["search_library_option"].format(library=library)
-            await self.page.click(option_selector)
+            menu_selector = SEL["search_library_menu"]
+            await self.page.wait_for_selector(menu_selector, timeout=15000)
+            menu_locator = self.page.locator(menu_selector).first
+            await menu_locator.wait_for(state="visible", timeout=15000)
+            option_locator = menu_locator.locator(
+                SEL["search_library_option"].format(library=library)
+            )
+            if not await option_locator.count():
+                option_locator = menu_locator.get_by_role(
+                    "option", name=re.compile(re.escape(library), re.IGNORECASE)
+                )
+            if not await option_locator.count():
+                raise RuntimeError(f"Library option '{library}' not found in menu")
+            await option_locator.first.scroll_into_view_if_needed()
+            await option_locator.first.click()
             await asyncio.sleep(throttle)
             try:
                 await self.page.wait_for_selector(SEL["search_backdrop"], timeout=2000)
@@ -109,11 +125,11 @@ class CDAsiaClient:
                 await self.page.keyboard.press("Escape")
             finally:
                 try:
-                    await self.page.wait_for_selector(SEL["search_library_menu"], state="hidden", timeout=15000)
+                    await menu_locator.wait_for(state="hidden", timeout=15000)
                 except PlaywrightTimeout:
                     logger.warning("Library menu did not close after selection.")
 
-        sections = self.cfg["filters"].get("sections", [])
+        sections = filters.get("sections", [])
         for section in sections:
             section_selector = SEL["search_section_chip"].format(section=section)
             locator = self.page.locator(section_selector)
@@ -123,7 +139,7 @@ class CDAsiaClient:
             else:
                 logger.warning(f"Section chip '{section}' not found")
 
-        division = self.cfg["filters"].get("division")
+        division = filters.get("division")
         if division:
             division_selector = SEL["search_division_chip"].format(division=division)
             locator = self.page.locator(division_selector)
@@ -132,6 +148,29 @@ class CDAsiaClient:
                 await asyncio.sleep(throttle)
             else:
                 logger.warning(f"Division chip '{division}' not found")
+
+        text_filters = [
+            ("title", "search_title_input"),
+            ("number", "search_number_input"),
+            ("ponente", "search_ponente_input"),
+            ("citation", "search_citation_input"),
+        ]
+
+        for filter_key, selector_key in text_filters:
+            value = filters.get(filter_key)
+            if value:
+                await self.page.fill(SEL[selector_key], value)
+                await asyncio.sleep(throttle)
+
+        court = filters.get("court")
+        if court:
+            court_locator = self.page.locator(SEL["search_court_input"])
+            await court_locator.click()
+            await court_locator.fill("")
+            await court_locator.fill(court)
+            await asyncio.sleep(throttle / 2)
+            await court_locator.press("Enter")
+            await asyncio.sleep(throttle)
 
         await self.page.click(SEL["search_submit"])
         await self.page.wait_for_selector(SEL["results_container"], timeout=60000)
